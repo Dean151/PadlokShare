@@ -10,29 +10,54 @@ import XCTest
 @testable import PadlokShare
 
 final class CryptoTests: XCTestCase {
+    
     func testSealAndOpen() throws {
         let codable = ["Hello", "World", try Crypto.randomPassphrase()]
         let (sealed, key, passphrase) = try Crypto.seal(codable)
         let decoded: [String] = try Crypto.open(sealed, using: key, and: passphrase)
         XCTAssertEqual(codable, decoded)
-        do {
-            // Should not work for different keys
-            let other = try Crypto.open(sealed, using: SymmetricKey(size: .bits256), and: passphrase) as [String]
-            XCTAssertNotEqual(codable, other)
-        } catch {}
-        do {
-            // Should not work for different passphrase
-            let other = try Crypto.open(sealed, using: key, and: try Crypto.randomPassphrase()) as [String]
-            XCTAssertNotEqual(codable, other)
-        } catch {}
+    }
+
+    func testSealAndOpenExpectedFailures() throws {
+        let codable = ["Hello", "World", try Crypto.randomPassphrase()]
+        let (sealed, key, passphrase) = try Crypto.seal(codable)
+        XCTAssertThrowsError(try Crypto.open(sealed, using: SymmetricKey(size: .bits256), and: passphrase) as [String]) { error in
+            guard let error = error as? CryptoKitError else {
+                XCTFail("Error is not a CryptoKitError")
+                return
+            }
+            if case .authenticationFailure = error {} else {
+                XCTFail("Error should be CryptoKitError.authenticationFailure")
+            }
+        }
+        XCTAssertThrowsError(try Crypto.open(sealed, using: key, and: try Crypto.randomPassphrase()) as [String]) { error in
+            guard let error = error as? CryptoKitError else {
+                XCTFail("Error is not a CryptoKitError")
+                return
+            }
+            if case .authenticationFailure = error {} else {
+                XCTFail("Error should be CryptoKitError.authenticationFailure")
+            }
+        }
+        XCTAssertThrowsError(try Crypto.open(sealed, using: key, and: passphrase) as [String: String]) { error in
+            guard let error = error as? DecodingError else {
+                XCTFail("Error is not a DecodingError")
+                return
+            }
+            if case let .typeMismatch(_, context) = error {
+                XCTAssertEqual(context.debugDescription, "Expected to decode Dictionary<String, String> but found an array instead.")
+            } else {
+                XCTFail("Error is not a DecodingError.typeMismatch")
+            }
+        }
     }
 
     func testRandomPassphrase() throws {
-        for _ in 1...20 {
-            let random1 = try Crypto.randomPassphrase()
-            let random2 = try Crypto.randomPassphrase()
-            XCTAssertEqual(16, random1.count)
-            XCTAssertEqual(16, random2.count)
+        for size in 6...16 {
+            let random1 = try Crypto.randomPassphrase(of: size)
+            let random2 = try Crypto.randomPassphrase(of: size)
+            XCTAssertEqual(size, random1.count)
+            XCTAssertEqual(size, random2.count)
             XCTAssertNotEqual(random1, random2)
         }
     }

@@ -35,7 +35,7 @@ public enum Crypto {
     }
 
     /// Return a random passphrase that will be of use within the URL
-    static func randomPassphrase() throws -> String {
+    static func randomPassphrase(of size: Int = 12) throws -> String {
         var passphrase: String
         repeat {
             let noise = SymmetricKey(size: .bits256).withUnsafeBytes {
@@ -45,8 +45,8 @@ public enum Crypto {
                     .replacingOccurrences(of: "+", with: "")
                     .replacingOccurrences(of: "/", with: "")
             }
-            passphrase = String(noise.prefix(16))
-        } while passphrase.count < 16
+            passphrase = String(noise.prefix(size))
+        } while passphrase.count < size
         return passphrase
     }
 
