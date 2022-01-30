@@ -22,13 +22,13 @@ final class CryptoTests: XCTestCase {
         let codable = ["Hello", "World", try Crypto.randomPassphrase()]
         let (sealed, key, passphrase) = try Crypto.seal(codable)
         XCTAssertThrowsError(try Crypto.open(sealed, using: SymmetricKey(size: .bits256), and: passphrase) as [String]) { error in
-            guard let error = error as? CryptoKitError else {
+            guard error is CryptoKitError else {
                 XCTFail("Error is not a CryptoKitError, got \(type(of: error)) instead.")
                 return
             }
         }
         XCTAssertThrowsError(try Crypto.open(sealed, using: key, and: try Crypto.randomPassphrase()) as [String]) { error in
-            guard let error = error as? CryptoKitError else {
+            guard error is CryptoKitError else {
                 XCTFail("Error is not a CryptoKitError, got \(type(of: error)) instead.")
                 return
             }
