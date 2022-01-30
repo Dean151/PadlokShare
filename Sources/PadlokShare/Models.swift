@@ -31,7 +31,7 @@ public enum Models {
     }
 
     public struct Door: Codable {
-        public enum Label: Codable {
+        public enum Label: Codable, Equatable {
             case door
             case gate
             case portal
