@@ -10,7 +10,7 @@ import XCTest
 @testable import PadlokShare
 
 final class CryptoTests: XCTestCase {
-    
+
     func testSealAndOpen() throws {
         let codable = ["Hello", "World", try Crypto.randomPassphrase()]
         let (sealed, key, passphrase) = try Crypto.seal(codable)
@@ -23,30 +23,28 @@ final class CryptoTests: XCTestCase {
         let (sealed, key, passphrase) = try Crypto.seal(codable)
         XCTAssertThrowsError(try Crypto.open(sealed, using: SymmetricKey(size: .bits256), and: passphrase) as [String]) { error in
             guard let error = error as? CryptoKitError else {
-                XCTFail("Error is not a CryptoKitError")
+                XCTFail("Error is not a CryptoKitError, got \(type(of: error)) instead.")
                 return
             }
             if case .authenticationFailure = error {} else {
-                XCTFail("Error should be CryptoKitError.authenticationFailure")
+                XCTFail("Error should be CryptoKitError.authenticationFailure, got \(error) instead.")
             }
         }
         XCTAssertThrowsError(try Crypto.open(sealed, using: key, and: try Crypto.randomPassphrase()) as [String]) { error in
             guard let error = error as? CryptoKitError else {
-                XCTFail("Error is not a CryptoKitError")
+                XCTFail("Error is not a CryptoKitError, got \(type(of: error)) instead.")
                 return
             }
             if case .authenticationFailure = error {} else {
-                XCTFail("Error should be CryptoKitError.authenticationFailure")
+                XCTFail("Error should be CryptoKitError.authenticationFailure, got \(error) instead.")
             }
         }
         XCTAssertThrowsError(try Crypto.open(sealed, using: key, and: passphrase) as [String: String]) { error in
             guard let error = error as? DecodingError else {
-                XCTFail("Error is not a DecodingError")
+                XCTFail("Error is not a DecodingError, got \(type(of: error)) instead.")
                 return
             }
-            if case let .typeMismatch(_, context) = error {
-                XCTAssertEqual(context.debugDescription, "Expected to decode Dictionary<String, String> but found an array instead.")
-            } else {
+            if case .typeMismatch = error {} else {
                 XCTFail("Error is not a DecodingError.typeMismatch")
             }
         }
