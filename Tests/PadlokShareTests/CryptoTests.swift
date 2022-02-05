@@ -18,6 +18,29 @@ final class CryptoTests: XCTestCase {
         XCTAssertEqual(codable, decoded)
     }
 
+    func testSealShouldCreateRandomKeyNonceAndPassphrase() throws {
+        let codable = ["Hello", "World", try Crypto.randomPassphrase()]
+        let (sealed1, key1, passphrase1) = try Crypto.seal(codable)
+        let (sealed2, key2, passphrase2) = try Crypto.seal(codable)
+        XCTAssertNotEqual(sealed1.nonce.withUnsafeBytes({ Data(Array($0)) }), sealed2.nonce.withUnsafeBytes({ Data(Array($0)) }))
+        XCTAssertNotEqual(key1, key2)
+        XCTAssertNotEqual(passphrase1, passphrase2)
+    }
+
+    func testKeyTagAndNonceSizes() throws {
+        let codable = ["Hello", "World", try Crypto.randomPassphrase()]
+        let (sealed, key, _) = try Crypto.seal(codable)
+        XCTAssertEqual(sealed.nonce.withUnsafeBytes({ Data(Array($0)) }).count, 12)
+        XCTAssertEqual(sealed.tag.count, 16)
+        XCTAssertEqual(key.withUnsafeBytes({ Data(Array($0)) }).count, 32)
+    }
+
+    func testCombinedSealedData() throws {
+        let codable = ["Hello", "World", try Crypto.randomPassphrase()]
+        let (sealed, _, _) = try Crypto.seal(codable)
+        XCTAssertEqual(sealed.combined, sealed.nonce + sealed.ciphertext + sealed.tag)
+    }
+
     func testSealAndOpenExpectedFailures() throws {
         let codable = ["Hello", "World", try Crypto.randomPassphrase()]
         let (sealed, key, passphrase) = try Crypto.seal(codable)

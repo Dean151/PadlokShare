@@ -21,7 +21,7 @@ public enum Crypto {
         let key = SymmetricKey(size: .bits256)
         let passphrase = try randomPassphrase()
         let signingKey = try derive(key, using: passphrase)
-        let sealed = try ChaChaPoly.seal(data, using: signingKey, nonce: .init())
+        let sealed = try ChaChaPoly.seal(data, using: signingKey)
         return (sealed, key, passphrase)
     }
 
