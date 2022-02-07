@@ -5,7 +5,6 @@
 //  Created by Thomas Durand on 29/01/2022.
 //
 
-import Crypto
 import XCTest
 @testable import PadlokShare
 
