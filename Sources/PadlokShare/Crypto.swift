@@ -14,7 +14,7 @@ public enum Crypto {
         let keyParameters: KeyParameters
 
         public init(key: KeyParameters, cipher: Data, nonce: Data) {
-            precondition(nonce.count == 12)
+            precondition(nonce.count == AES.blockSize)
             self.combined = nonce + cipher
             self.keyParameters = key
         }
@@ -25,10 +25,10 @@ public enum Crypto {
         }
 
         var nonce: Data {
-            combined[..<12]
+            combined[..<AES.blockSize]
         }
         var cipher: Data {
-            combined[12...]
+            combined[AES.blockSize...]
         }
     }
 
@@ -61,7 +61,7 @@ public enum Crypto {
         private static func randomPassphrase(count: Int = 12) -> String {
             var passphrase: String
             repeat {
-                let noise = ChaCha20.randomIV(count).toBase64()
+                let noise = AES.randomIV(count).toBase64()
                     .replacingOccurrences(of: "=", with: "")
                     .replacingOccurrences(of: "+", with: "")
                     .replacingOccurrences(of: "/", with: "")
@@ -77,15 +77,17 @@ public enum Crypto {
         let encoder = JSONEncoder()
         let data = try encoder.encode(encodable)
         let parameters = try KeyParameters.generate(count: count)
-        let nonce = ChaCha20.randomIV(12)
-        let cipher = try ChaCha20(key: try parameters.key(), iv: nonce).encrypt(data.bytes)
+        let nonce = AES.randomIV(AES.blockSize)
+        let gcm = GCM(iv: nonce, mode: .combined)
+        let cipher = try AES(key: try parameters.key(), blockMode: gcm, padding: .pkcs7).encrypt(data.bytes)
         return .init(key: parameters, cipher: Data(cipher), nonce: Data(nonce))
     }
 
     /// This function will allow the server to decrypt data when required (webapp) ; or the iOS app to do so (AppClip, import...)
     /// The less the servers does, the best it is
     public static func open<T: Decodable>(_ box: SealedBoxAndPassphrase) throws -> T {
-        let bytes = try ChaCha20(key: try box.keyParameters.key(), iv: box.nonce.bytes).decrypt(box.cipher.bytes)
+        let gcm = GCM(iv: box.nonce.bytes, mode: .combined)
+        let bytes = try AES(key: try box.keyParameters.key(), blockMode: gcm, padding: .pkcs7).decrypt(box.cipher.bytes)
         return try JSONDecoder().decode(T.self, from: Data(bytes))
     }
 }

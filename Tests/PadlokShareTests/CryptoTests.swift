@@ -31,7 +31,7 @@ final class CryptoTests: XCTestCase {
     func testKeyTagAndNonceSizes() throws {
         let codable = ["Hello", "World", ChaCha20.randomIV(16).toBase64()]
         let sealed = try Crypto.seal(codable)
-        XCTAssertEqual(sealed.nonce.count, 12)
+        XCTAssertEqual(sealed.nonce.count, AES.blockSize)
         XCTAssertEqual(try sealed.keyParameters.key().count, 32)
     }
 
