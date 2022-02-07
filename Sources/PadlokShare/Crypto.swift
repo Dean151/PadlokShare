@@ -37,6 +37,13 @@ public enum Crypto {
         public let salt: Data
         public let iterations: Int
 
+
+        public init(passphrase: String, salt: Data, iterations: Int) {
+            self.passphrase = passphrase
+            self.salt = salt
+            self.iterations = iterations
+        }
+
         func key() throws -> [UInt8] {
             try PKCS5.PBKDF2(
                 password: Array(passphrase.utf8),
