@@ -8,7 +8,7 @@
 import Foundation
 
 public enum Models {
-    public struct Building: Codable {
+    public struct Building: Codable, Equatable {
         // Identifier
         public let identifier: UUID
 
@@ -25,12 +25,12 @@ public enum Models {
         public let moreInfos: String?
     }
 
-    public struct Coordinates: Codable {
+    public struct Coordinates: Codable, Equatable {
         public let latitude: Double
         public let longitude: Double
     }
 
-    public struct Door: Codable {
+    public struct Door: Codable, Equatable {
         public enum Label: Codable, Equatable {
             case door
             case gate
@@ -39,5 +39,28 @@ public enum Models {
         }
         public let label: Label
         public let code: String
+    }
+}
+
+// Test case
+
+extension Models.Building {
+    static var test: Models.Building {
+        return .init(
+            identifier: UUID(uuidString: "3357815D-BECA-477D-97F0-F89F93054CCC").unsafelyUnwrapped,
+            address: "55 de la rue du Faubourg-Saint-Honoré",
+            coordinates: .init(latitude: 48.869978342034287, longitude: 2.3165022395478303),
+            building: "Principal",
+            doors: [
+                .init(label: .door, code: "AB23C"),
+                .init(label: .gate, code: "P12BD"),
+                .init(label: .portal, code: "GUARD"),
+                .init(label: .custom(string: "Porte Jupiter"), code: "19B29B02")
+            ],
+            intercom: "M. le Président",
+            staircase: "Principal",
+            floor: 1,
+            moreInfos: "Bureau du président"
+        )
     }
 }

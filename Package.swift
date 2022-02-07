@@ -12,13 +12,13 @@ let package = Package(
             targets: ["PadlokShare"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-crypto.git", .upToNextMajor(from: "2.0.0")),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", .upToNextMajor(from: "1.0.0"))
     ],
     targets: [
         .target(
             name: "PadlokShare",
             dependencies: [
-                .product(name: "Crypto", package: "swift-crypto"),
+                .product(name: "CryptoSwift", package: "CryptoSwift"),
             ]),
         .testTarget(
             name: "PadlokShareTests",
