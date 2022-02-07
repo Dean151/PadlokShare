@@ -33,9 +33,9 @@ public enum Crypto {
     }
 
     public struct KeyParameters {
-        let passphrase: String
-        let salt: Data
-        let iterations: Int
+        public let passphrase: String
+        public let salt: Data
+        public let iterations: Int
 
         func key() throws -> [UInt8] {
             try PKCS5.PBKDF2(
