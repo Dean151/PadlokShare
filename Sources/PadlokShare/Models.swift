@@ -23,11 +23,28 @@ public enum Models {
         public let staircase: String?
         public let floor: Int?
         public let moreInfos: String?
+
+        public init(identifier: UUID, address: String, coordinates: Models.Coordinates, building: String?, doors: [Models.Door], intercom: String?, staircase: String?, floor: Int?, moreInfos: String?) {
+            self.identifier = identifier
+            self.address = address
+            self.coordinates = coordinates
+            self.building = building
+            self.doors = doors
+            self.intercom = intercom
+            self.staircase = staircase
+            self.floor = floor
+            self.moreInfos = moreInfos
+        }
     }
 
     public struct Coordinates: Codable, Equatable {
         public let latitude: Double
         public let longitude: Double
+
+        public init(latitude: Double, longitude: Double) {
+            self.latitude = latitude
+            self.longitude = longitude
+        }
     }
 
     public struct Door: Codable, Equatable {
@@ -39,6 +56,11 @@ public enum Models {
         }
         public let label: Label
         public let code: String
+
+        public init(label: Models.Door.Label, code: String) {
+            self.label = label
+            self.code = code
+        }
     }
 }
 

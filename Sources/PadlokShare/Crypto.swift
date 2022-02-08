@@ -10,8 +10,8 @@ import Foundation
 
 public enum Crypto {
     public struct SealedBoxAndPassphrase {
-        let combined: Data
-        let keyParameters: KeyParameters
+        public let combined: Data
+        public let keyParameters: KeyParameters
 
         public init(key: KeyParameters, cipher: Data, nonce: Data) {
             precondition(nonce.count == AES.blockSize)
@@ -52,31 +52,31 @@ public enum Crypto {
             ).calculate()
         }
 
-        static func generate(count: Int = 12) throws -> Self {
+        static func generate(passphraseLength length: Int = 12, iterations: Int = 1000) throws -> Self {
             // 64 bits a.k.a 8 bytes is the minimum according to https://stackoverflow.com/questions/17218089/salt-and-hash-using-pbkdf2
             let salt: [UInt8] = AES.randomIV(8)
-            return KeyParameters(passphrase: randomPassphrase(count: count), salt: Data(salt), iterations: 1000)
+            return KeyParameters(passphrase: randomPassphrase(passphraseLength: length), salt: Data(salt), iterations: iterations)
         }
 
-        private static func randomPassphrase(count: Int = 12) -> String {
+        private static func randomPassphrase(passphraseLength length: Int = 12) -> String {
             var passphrase: String
             repeat {
-                let noise = AES.randomIV(count).toBase64()
+                let noise = AES.randomIV(length * 2).toBase64()
                     .replacingOccurrences(of: "=", with: "")
                     .replacingOccurrences(of: "+", with: "")
                     .replacingOccurrences(of: "/", with: "")
-                passphrase = String(noise.prefix(count))
-            } while passphrase.count < count
+                passphrase = String(noise.prefix(length))
+            } while passphrase.count < length
             return passphrase
         }
     }
 
     /// This function will only run on iOS devices anyway. It's about encoding the data, encrypting it.
     /// Note that the signing key is derived using  a passphrase that the server will ignore
-    public static func seal<T: Encodable>(_ encodable: T, count: Int = 12) throws -> SealedBoxAndPassphrase {
+    public static func seal<T: Encodable>(_ encodable: T, passphraseLength length: Int = 12, iterations: Int = 1000) throws -> SealedBoxAndPassphrase {
         let encoder = JSONEncoder()
         let data = try encoder.encode(encodable)
-        let parameters = try KeyParameters.generate(count: count)
+        let parameters = try KeyParameters.generate(passphraseLength: length)
         let nonce = AES.randomIV(AES.blockSize)
         let gcm = GCM(iv: nonce, mode: .combined)
         let cipher = try AES(key: try parameters.key(), blockMode: gcm, padding: .pkcs7).encrypt(data.bytes)
