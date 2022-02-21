@@ -55,7 +55,7 @@ final class CryptoTests: XCTestCase {
             }
         }
         // Wrong key
-        let otherKey = Crypto.SealedBoxAndPassphrase(key: try .generate(), cipher: sealed.cipher, nonce: sealed.nonce)
+        let otherKey = Crypto.SealedBoxAndPassphrase(key: .generate(), cipher: sealed.cipher, nonce: sealed.nonce)
         XCTAssertThrowsError(try Crypto.open(otherKey) as [String])
         // Wrong passphrase
         let wrongPassphrase = Crypto.SealedBoxAndPassphrase(key: .init(passphrase: otherKey.keyParameters.passphrase, salt: sealed.keyParameters.salt, iterations: sealed.keyParameters.iterations), cipher: sealed.cipher, nonce: sealed.nonce)
@@ -63,8 +63,8 @@ final class CryptoTests: XCTestCase {
     }
 
     func testRandomPassphrase() throws {
-        let key1 = try Crypto.KeyParameters.generate()
-        let key2 = try Crypto.KeyParameters.generate()
+        let key1 = Crypto.KeyParameters.generate()
+        let key2 = Crypto.KeyParameters.generate()
         XCTAssertNotEqual(try key1.key(), try key2.key())
         XCTAssertNotEqual(key1.passphrase, key2.passphrase)
     }
