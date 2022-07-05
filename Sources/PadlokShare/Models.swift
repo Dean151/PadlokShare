@@ -22,9 +22,10 @@ public enum Models {
         public let intercom: String?
         public let staircase: String?
         public let floor: Int?
+        public let flat: String?
         public let moreInfos: String?
 
-        public init(identifier: UUID, address: String, coordinates: Models.Coordinates, building: String?, doors: [Models.Door], intercom: String?, staircase: String?, floor: Int?, moreInfos: String?) {
+        public init(identifier: UUID, address: String, coordinates: Models.Coordinates, building: String?, doors: [Models.Door], intercom: String?, staircase: String?, floor: Int?, flat: String?, moreInfos: String?) {
             self.identifier = identifier
             self.address = address
             self.coordinates = coordinates
@@ -33,6 +34,7 @@ public enum Models {
             self.intercom = intercom
             self.staircase = staircase
             self.floor = floor
+            self.flat = flat
             self.moreInfos = moreInfos
         }
     }
@@ -82,6 +84,7 @@ extension Models.Building {
             intercom: "M. le Président",
             staircase: "Principal",
             floor: 1,
+            flat: nil,
             moreInfos: "Bureau du président"
         )
     }
