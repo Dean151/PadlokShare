@@ -3,9 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "PadlokShare",
-    platforms: [
-        .macOS(.v11)
-    ],
+    platforms: [.iOS(.v14), .watchOS(.v7), .macOS(.v11)],
     products: [
         .library(
             name: "PadlokShare",
